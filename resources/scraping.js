@@ -34,14 +34,14 @@ const initialize = async (p) => {
     page.waitForNavigation({ waitUntil: 'load', timeout: 150000 }),
   ]);
 
-  const external = await page.waitForSelector('.tambienpuedes-card:nth-child(4) > .m0', {
-    timeout: 120000,
-  });
+  const otherInvoices = await page.waitForSelector(
+    '.tambienpuedes-content-card .tambienpuedes-card:nth-of-type(3)',
+    {
+      timeout: 120000,
+    }
+  );
 
-  await Promise.all([
-    external.click(),
-    page.waitForNavigation({ waitUntil: 'load', timeout: 150000 }),
-  ]);
+  await otherInvoices.click();
 };
 
 module.exports = { initialize };
