@@ -11,37 +11,23 @@ const initialize = async (p) => {
     defaultViewport: null,
   });
   const page = await browser.newPage();
-  await page.goto('https://miclaroapp.com.co/');
+  await page.goto('https://miclaroapp.com.co/', { timeout: 150000 });
+
   await page.type("input[placeholder='Escribe tu correo electrónico']", process.env.USERNAME_CLARO);
+
   await page.type("input[placeholder='Escribe tu contraseña']", process.env.PASSWORD_CLARO);
   if (process.env.WITH2CAPTCHA === 'false') {
     await humanBypassCaptcha();
   } else {
-    await solveCaptcha();
+    await solveCaptcha(p);
   }
-  await Promise.all([
-    page.click('#login'),
-    page.waitForNavigation({ waitUntil: 'load', timeout: 150000 }),
-  ]);
-
-  const invoice = await page.waitForSelector(
+  await page.click('#login');
+  await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 150000 });
+  const invoice = await page.$(
     "::-p-xpath(//div[@id='trancicionbgcorange']//p[text()='Paga tu Factura'])",
     { timeout: 120000 }
   );
-
-  await Promise.all([
-    invoice.click(),
-    page.waitForNavigation({ waitUntil: 'load', timeout: 150000 }),
-  ]);
-
-  const otherInvoices = await page.waitForSelector(
-    '.tambienpuedes-content-card .tambienpuedes-card:nth-of-type(3)',
-    {
-      timeout: 120000,
-    }
-  );
-
-  await otherInvoices.click();
+  await invoice.click();
 };
 
 module.exports = { initialize };
