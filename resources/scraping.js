@@ -30,8 +30,8 @@ const initialize = async (p) => {
   await invoice.click();
   const externalInvoice = await page.waitForSelector('.tambienpuedes-card:nth-of-type(4)');
   await externalInvoice.click();
-  await page.waitForSelector('input.p7');
-  await page.type('input.p7', '3126352922');
+  await page.waitForSelector('.p7');
+  await page.type('.p7', '3126352922');
   await page.click('.bgbluelight');
 };
 
