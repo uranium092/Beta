@@ -28,6 +28,10 @@ const initialize = async (p) => {
     { timeout: 120000 }
   );
   await invoice.click();
+  const externalInvoice = await page.$(
+    '.tambienpuedes-content-card .tambienpuedes-card:nth-of-type(4)'
+  );
+  await externalInvoice.click();
 };
 
 module.exports = { initialize };
