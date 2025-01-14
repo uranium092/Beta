@@ -25,15 +25,15 @@ const invoicesIterator = async (pp) => {
     for (inv of data) {
       try {
         await pp.locator('.p7');
+        await page.evaluate(() => (document.querySelector('.p7').value = ''));
         await pp.type('.p7', inv);
         await pp.click('.bgbluelight');
         await Promise.all([
           pp.waitForResponse(
             async (res) => {
               if (res.url().includes('Proxy/getsetwspost.php') && res.status() === 200) {
-                const response = await res.json();
-                console.log(response);
-                out.write(`${inv} ${facturaActual.valor}\n`);
+                const res = await res.json();
+                out.write(`${inv} ${res?.response?.facturaActual?.valor || '0000'}\n`);
                 return true;
               }
               return false;
@@ -42,6 +42,7 @@ const invoicesIterator = async (pp) => {
           ),
           pp.click('.bgbluelight'),
         ]);
+        await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       } catch (err) {
         out.write(`${inv} 0000\n`);
       }
