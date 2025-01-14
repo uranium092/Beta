@@ -29,13 +29,21 @@ const invoicesIterator = async (pp) => {
         await pp.evaluate(() => (document.querySelector('.p7').value = ''));
         await pp.type('.p7', inv);
         await pp.click('.bgbluelight');
+        let notFound = false;
         await Promise.all([
           pp.waitForResponse(
             async (res) => {
               if (res.url().includes('Proxy/getsetwspost.php') && res.status() === 200) {
                 const claro = await res.json();
-                out.write(`${inv} ${claro?.response?.facturaActual?.valor || '0000'}\n`);
-                return true;
+                if (claro.error === 1 && claro.response.includes('documentos para la cuenta')) {
+                  notFound = true;
+                  return true;
+                }
+                const val = claro?.response?.facturaActual?.valor;
+                if (val) {
+                  out.write(`${inv} ${val || '0000'}\n`);
+                  return true;
+                }
               }
               return false;
             },
@@ -43,7 +51,16 @@ const invoicesIterator = async (pp) => {
           ),
           pp.click('.bgbluelight'),
         ]);
-        await new Promise((resolve, reject) => setTimeout(() => resolve(), 3500));
+        let time = 3500;
+        if (notFound) {
+          await pp
+            .locator(
+              'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
+            )
+            .click();
+          time = 2000;
+        }
+        await new Promise((resolve, reject) => setTimeout(() => resolve(), time));
       } catch (err) {
         console.log(err);
         out.write(`${inv} 0000\n`);
