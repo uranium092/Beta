@@ -5,13 +5,16 @@ const fs = require('fs');
  * @param {import('puppeteer').Page} pp
  */
 const invoicesIterator = async (pp) => {
+  console.log(1);
   const filePath = path.join(__dirname, '/../files/input.txt');
   fs.readFile(filePath, 'utf-8', async (err, data) => {
+    console.log(2);
     if (err) {
       console.log('===ERROR===', err.message);
       // return process.exit();
     }
     data = data.split('\n');
+    console.log(3, data);
     const filePathOut = path.join(__dirname, '/../files/output.txt');
     let out;
     try {
@@ -22,7 +25,9 @@ const invoicesIterator = async (pp) => {
       console.error('===ERROR===', err.message);
       throw new Error('OUTPUT_NF');
     }
+    console.log(4);
     for (inv of data) {
+      console.log(inv, ' ----inv----');
       try {
         await pp.locator('.p7');
         await page.evaluate(() => (document.querySelector('.p7').value = ''));
