@@ -44,6 +44,8 @@ const invoicesIterator = async (pp) => {
                   out.write(`${inv} ${val || '0000'}\n`);
                   return true;
                 }
+                out.write(`${inv} ${val || '0'}\n`);
+                return true;
               }
               return false;
             },
