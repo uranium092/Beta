@@ -49,6 +49,7 @@ const invoicesIterator = async (pp) => {
         ]);
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       } catch (err) {
+        console.log(err);
         out.write(`${inv} 0000\n`);
       }
     }
