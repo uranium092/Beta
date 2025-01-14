@@ -27,10 +27,11 @@ const invoicesIterator = async (pp) => {
     }
     console.log(4);
     for (inv of data) {
+      inv = inv.replace(/\D/g, '');
       console.log(inv, ' ----inv----');
       try {
         await pp.locator('.p7');
-        await page.evaluate(() => (document.querySelector('.p7').value = ''));
+        await pp.evaluate(() => (document.querySelector('.p7').value = ''));
         await pp.type('.p7', inv);
         await pp.click('.bgbluelight');
         await Promise.all([
