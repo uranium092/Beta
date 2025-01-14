@@ -25,7 +25,7 @@ const invoicesIterator = async (pp) => {
     for (inv of data) {
       try {
         await pp.locator('.p7');
-        await page.evaluate(() => (document.querySelector('.p7').value = ''));
+        await pp.type('.p7', '');
         await pp.type('.p7', inv);
         await pp.click('.bgbluelight');
         await Promise.all([
@@ -33,6 +33,11 @@ const invoicesIterator = async (pp) => {
             async (res) => {
               if (res.url().includes('Proxy/getsetwspost.php') && res.status() === 200) {
                 const res = await res.json();
+                console.log(
+                  res?.response,
+                  res.response.facturaActual,
+                  res.response.facturaActual.valor
+                );
                 out.write(`${inv} ${res?.response?.facturaActual?.valor || '0000'}\n`);
                 return true;
               }
