@@ -47,7 +47,7 @@ const invoicesIterator = async (pp) => {
               }
               return false;
             },
-            { timeout: 60000 }
+            { timeout: 120000 }
           ),
           pp.click('.bgbluelight'),
         ]);
