@@ -53,6 +53,7 @@ const invoicesIterator = async (pp) => {
         ]);
         let time = 3500;
         if (notFound) {
+          out.write(`${inv} 0\n`);
           await pp
             .locator(
               'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
