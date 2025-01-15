@@ -74,6 +74,7 @@ const invoicesIterator = async (pp) => {
               'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
             )
             .click();
+          await new Promise((resolve, reject) => setTimeout(() => resolve(), 1000));
         }
       } catch (err) {
         out.write(`${inv} C2\n`);
