@@ -33,9 +33,6 @@ const initialize = async (p) => {
   await page.locator('.tambienpuedes-card:nth-of-type(4)').click();
   try {
     await invoicesIterator(page);
-    console.log('************************');
-    console.log('* BOT FINISHED SUCCESS *');
-    console.log('************************');
   } catch (err) {
     console.log('************************');
     console.log(`${err.message === 'OUTPUT_NF' ? 'NO_OUTPUT.TXT_EXISTS' : 'CLARO_ERROR'}`);
