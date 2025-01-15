@@ -46,7 +46,7 @@ const invoicesIterator = async (pp) => {
                   return true;
                 }
                 const val = claro?.response?.facturaActual?.valor;
-                if (val === 0) {
+                if (val == 0) {
                   dataTrigger = { trigger: false };
                   return true;
                 }
