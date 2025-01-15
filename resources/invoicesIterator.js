@@ -33,31 +33,34 @@ const invoicesIterator = async (pp) => {
         await pp.type('.p7', inv);
         let dataTrigger = { trigger: true };
         await Promise.all([
-          pp.waitForResponse(async (response) => {
-            if (response.url().includes('Proxy/getsetwspost.php')) {
-              const claro = await response.json();
-              if (claro?.error === 1 && claro?.response.includes('documentos para la cuenta')) {
-                dataTrigger = { trigger: false };
+          pp.waitForResponse(
+            async (response) => {
+              if (response.url().includes('Proxy/getsetwspost.php')) {
+                const claro = await response.json();
+                if (claro?.error === 1 && claro?.response.includes('documentos para la cuenta')) {
+                  dataTrigger = { trigger: false };
+                  return true;
+                }
+                if (claro?.error === 1) {
+                  dataTrigger = { trigger: false };
+                  return true;
+                }
+                const val = claro?.response?.facturaActual?.valor;
+                if (val === 0) {
+                  dataTrigger = { trigger: false };
+                  return true;
+                }
+                if (val) {
+                  out.write(`${inv} ${val}\n`);
+                  return true;
+                }
+                out.write(`${inv} C1\n`);
                 return true;
               }
-              if (claro?.error === 1) {
-                dataTrigger = { trigger: false };
-                return true;
-              }
-              const val = claro?.response?.facturaActual?.valor;
-              if (val === 0) {
-                dataTrigger = { trigger: false };
-                return true;
-              }
-              if (val) {
-                out.write(`${inv} ${val}\n`);
-                return true;
-              }
-              out.write(`${inv} C1\n`);
-              return true;
-            }
-            return false;
-          }),
+              return false;
+            },
+            { timeout: 60000 }
+          ),
           pp.click('.bgbluelight'),
         ]);
         if (!dataTrigger.trigger) {
