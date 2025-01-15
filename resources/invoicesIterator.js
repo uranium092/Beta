@@ -24,7 +24,6 @@ const invoicesIterator = async (pp) => {
     }
     for (inv of data) {
       try {
-        console.log('=============================', inv, '=============================');
         inv = inv.substring(0, 10).replaceAll(/\D/g, '');
         if (inv.length !== 10) {
           throw new Error('Invalid number');
@@ -38,9 +37,7 @@ const invoicesIterator = async (pp) => {
             async (response) => {
               if (response.url().includes('Proxy/getsetwspost.php')) {
                 const claro = await response.json();
-                console.log(claro);
                 if (claro?.error === 1 && claro?.response.includes('documentos para la cuenta')) {
-                  console.log('===========1========', inv);
                   dataTrigger = { trigger: false };
                   return true;
                 }
@@ -67,20 +64,24 @@ const invoicesIterator = async (pp) => {
           pp.click('.bgbluelight'),
         ]);
         if (!dataTrigger.trigger) {
-          console.log('===========2========', inv);
           out.write(`${inv} 0\n`);
-          await pp.waitForSelector(
-            'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button',
-            { visible: true }
-          );
+          await pp.waitForFunction(() => {
+            const modal = document.querySelector('.sweet-alert');
+            return modal.classList.contains('visible');
+          });
           await pp
             .locator(
               'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
             )
             .click();
+          await pp.waitForFunction(() => {
+            const modal = document.querySelector('.sweet-alert');
+            return !modal.classList.contains('visible') || modal.style.display === 'none';
+          });
           await new Promise((resolve, reject) => setTimeout(() => resolve(), 1000));
         }
       } catch (err) {
+        console.log(err);
         out.write(`${inv} C2\n`);
       } finally {
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
