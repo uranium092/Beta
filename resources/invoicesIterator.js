@@ -65,6 +65,10 @@ const invoicesIterator = async (pp) => {
         ]);
         if (!dataTrigger.trigger) {
           out.write(`${inv} 0\n`);
+          await pp.waitForSelector(
+            'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button',
+            { visible: true }
+          );
           await pp
             .locator(
               'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
