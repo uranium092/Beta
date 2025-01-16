@@ -84,6 +84,7 @@ const invoicesIterator = async (pp) => {
       } catch (err) {
         console.log(err);
       } finally {
+        pp.removeAllListeners('response');
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       }
     }
