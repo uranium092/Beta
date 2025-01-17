@@ -2,12 +2,19 @@ const path = require('path');
 const { solveCaptcha } = require('./with2captcha');
 const { humanBypassCaptcha } = require('./without2captcha');
 const fs = require('fs');
-const { invoicesIterator } = require('./invoicesIterator');
+const { invoicesIterator, goToSearchPage } = require('./invoicesIterator');
 
 /**
  * @param {import('puppeteer')} p
  */
 const initialize = async (p) => {
+  const BOT_MODE = process.env.BOT_MODE;
+  if (!['PASSIVE', 'AGGRESSIVE'].includes(BOT_MODE)) {
+    console.log('**************************************************');
+    console.log(`* INCLUDE BOT_MODE ON .ENV: AGGRESIVE or PASSIVE *`);
+    console.log('**************************************************');
+    return process.exit();
+  }
   const browser = await p.launch({
     headless: false,
     defaultViewport: null,
@@ -24,21 +31,21 @@ const initialize = async (p) => {
     await solveCaptcha(p);
   }
   await page.click('#login');
-  await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 150000 });
-  const invoice = await page.waitForSelector(
-    "::-p-xpath(//div[@id='trancicionbgcorange']//p[text()='Paga tu Factura'])",
-    { visible: true }
-  );
-  await invoice.click();
-  await page.locator('.tambienpuedes-card:nth-of-type(4)').click();
+  await page.waitForNavigation({
+    waitUntil: ['networkidle0', 'domcontentloaded'],
+    timeout: 150000,
+  });
   try {
     await invoicesIterator(page);
+    console.log('************************');
+    console.log(`* BOT FINISHED SUCCESS *`);
+    console.log('************************');
   } catch (err) {
     console.log('************************');
     console.log(`${err.message === 'OUTPUT_NF' ? 'NO_OUTPUT.TXT_EXISTS' : 'CLARO_ERROR'}`);
     console.log('************************');
   } finally {
-    // process.exit();
+    process.exit();
   }
 };
 

@@ -1,30 +1,40 @@
 const path = require('path');
 const fs = require('fs');
 
+const goToSearchPage = async (page) => {
+  const invoice = await page.waitForSelector(
+    "::-p-xpath(//div[@id='trancicionbgcorange']//p[text()='Paga tu Factura'])",
+    { visible: true }
+  );
+  await invoice.click();
+  await page.locator('.tambienpuedes-card:nth-of-type(4)').click();
+};
+
 /**
  * @param {import('puppeteer').Page} pp
  */
 const invoicesIterator = async (pp) => {
   const filePath = path.join(__dirname, '/../files/input.txt');
-  fs.readFile(filePath, 'utf-8', async (err, data) => {
-    if (err) {
-      console.log('===ERROR===', err.message);
-      return process.exit();
-    }
-    data = data.split('\n');
-    const filePathOut = path.join(__dirname, '/../files/output.txt');
-    let out;
-    try {
-      out = fs.createWriteStream(filePathOut, {
-        flags: 'w',
-      });
-    } catch (err) {
-      console.error('===ERROR===', err.message);
-      return process.exit();
-    }
-    for (inv of data) {
+  const data = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }).split('\n');
+  const filePathOut = path.join(__dirname, '/../files/output.txt');
+  let out;
+  try {
+    out = fs.createWriteStream(filePathOut, {
+      flags: 'w',
+    });
+  } catch (err) {
+    console.error('===ERROR===', err.message);
+    return process.exit();
+  }
+  let lastIndex = 0;
+
+  while (true) {
+    await goToSearchPage(pp);
+    const arr = data.slice(lastIndex);
+    let needSpeedBreakLoop = true;
+    for (let index = 0; index < arr.length; index++) {
       try {
-        inv = inv.substring(0, 10).replaceAll(/\D/g, '');
+        const inv = arr[index].substring(0, 10).replaceAll(/\D/g, '');
         if (inv.length !== 10) {
           throw new Error('Invalid number');
         }
@@ -54,19 +64,25 @@ const invoicesIterator = async (pp) => {
                 }
                 const val = claro?.response?.facturaActual?.valor;
                 if (val == 0) {
-                  await pp.waitForFunction(() => {
-                    const modal = document.querySelector('.sweet-alert');
-                    return modal.classList.contains('visible');
-                  });
-                  await pp
-                    .locator(
-                      'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
-                    )
-                    .click();
-                  await pp.waitForFunction(() => {
-                    const modal = document.querySelector('.sweet-alert');
-                    return !modal.classList.contains('visible') || modal.style.display === 'none';
-                  });
+                  const BOT_MODE = process.env.BOT_MODE;
+                  if (BOT_MODE === 'AGGRESSIVE') {
+                    await pp.waitForFunction(() => {
+                      const modal = document.querySelector('.sweet-alert');
+                      return modal.classList.contains('visible');
+                    });
+                    await pp
+                      .locator(
+                        'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
+                      )
+                      .click();
+                    await pp.waitForFunction(() => {
+                      const modal = document.querySelector('.sweet-alert');
+                      return !modal.classList.contains('visible') || modal.style.display === 'none';
+                    });
+                  } else {
+                    lastIndex = index + 1;
+                    needSpeedBreakLoop = false;
+                  }
                   return true;
                 }
                 if (val) {
@@ -81,14 +97,26 @@ const invoicesIterator = async (pp) => {
           ),
           pp.click('.bgbluelight'),
         ]);
-      } catch (err) {
-        console.log(err);
-      } finally {
         pp.removeAllListeners('response');
+        if (!needSpeedBreakLoop) {
+          break;
+        }
+        await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
+      } catch (err) {
+        const mss = err.message || err;
+        if (mss.includes('evaluate') || mss.includes('.p7')) {
+          needSpeedBreakLoop = false;
+          lastIndex = index;
+          break;
+        }
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       }
     }
-  });
+    if (needSpeedBreakLoop) {
+      break;
+    }
+    await pp.reload({ waitUntil: ['networkidle0', 'domcontentloaded'], timeout: 150000 });
+  }
 };
 
 module.exports = { invoicesIterator };
