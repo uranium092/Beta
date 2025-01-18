@@ -103,13 +103,9 @@ const invoicesIterator = async (pp) => {
         }
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       } catch (err) {
-        const mss = err.message || err;
-        if (mss.includes('evaluate') || mss.includes('.p7')) {
-          needSpeedBreakLoop = false;
-          lastIndex = index;
-          break;
-        }
-        await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
+        needSpeedBreakLoop = false;
+        lastIndex = index;
+        break;
       }
     }
     if (needSpeedBreakLoop) {
