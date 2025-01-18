@@ -15,12 +15,15 @@ const goToSearchPage = async (page) => {
  */
 const invoicesIterator = async (pp) => {
   const filePath = path.join(__dirname, '/../files/input.txt');
-  const data = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' }).split('\n');
+  const data = fs
+    .readFileSync(filePath, { encoding: 'utf8', flag: 'r' })
+    .split('\n')
+    .map((val, trustPosition) => ({ val, trustPosition }));
   const filePathOut = path.join(__dirname, '/../files/output.txt');
   let out;
   try {
     out = fs.createWriteStream(filePathOut, {
-      flags: 'w',
+      flags: 'a',
     });
   } catch (err) {
     console.error('===ERROR===', err.message);
@@ -33,8 +36,9 @@ const invoicesIterator = async (pp) => {
     const arr = data.slice(lastIndex);
     let needSpeedBreakLoop = true;
     for (let index = 0; index < arr.length; index++) {
+      const { trustPosition, val } = arr[index];
       try {
-        const inv = arr[index].substring(0, 10).replaceAll(/\D/g, '');
+        const inv = val.substring(0, 10).replaceAll(/\D/g, '');
         if (inv.length !== 10) {
           throw new Error('Invalid number');
         }
@@ -80,7 +84,7 @@ const invoicesIterator = async (pp) => {
                       return !modal.classList.contains('visible') || modal.style.display === 'none';
                     });
                   } else {
-                    lastIndex = index + 1;
+                    lastIndex = trustPosition + 1;
                     needSpeedBreakLoop = false;
                   }
                   return true;
@@ -104,7 +108,7 @@ const invoicesIterator = async (pp) => {
         await new Promise((resolve, reject) => setTimeout(() => resolve(), 2500));
       } catch (err) {
         needSpeedBreakLoop = false;
-        lastIndex = index;
+        lastIndex = trustPosition;
         break;
       }
     }
