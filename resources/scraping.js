@@ -11,7 +11,7 @@ const initialize = async (p) => {
   const BOT_MODE = process.env.BOT_MODE;
   if (!['PASSIVE', 'AGGRESSIVE'].includes(BOT_MODE)) {
     console.log('**************************************************');
-    console.log(`* INCLUDE BOT_MODE ON .ENV: AGGRESIVE or PASSIVE *`);
+    console.log(`* INCLUDE BOT_MODE ON .ENV: AGGRESSIVE or PASSIVE *`);
     console.log('**************************************************');
     return process.exit();
   }
