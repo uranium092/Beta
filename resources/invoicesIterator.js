@@ -51,11 +51,8 @@ const invoicesIterator = async (pp) => {
                     const modal = document.querySelector('.sweet-alert');
                     return modal.classList.contains('visible');
                   });
-                  await pp
-                    .locator(
-                      'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
-                    )
-                    .click();
+                  const btn = await pp.$('.sweet-alert > div.sa-button-container > div > button');
+                  await btn.evaluate((el) => el.click());
                   await pp.waitForFunction(() => {
                     const modal = document.querySelector('.sweet-alert');
                     return !modal.classList.contains('visible') || modal.style.display === 'none';
@@ -70,11 +67,8 @@ const invoicesIterator = async (pp) => {
                       const modal = document.querySelector('.sweet-alert');
                       return modal.classList.contains('visible');
                     });
-                    await pp
-                      .locator(
-                        'body > div.sweet-alert.showSweetAlert.visible > div.sa-button-container > div > button'
-                      )
-                      .click();
+                    const btn = await pp.$('.sweet-alert > div.sa-button-container > div > button');
+                    await btn.evaluate((el) => el.click());
                     await pp.waitForFunction(() => {
                       const modal = document.querySelector('.sweet-alert');
                       return !modal.classList.contains('visible') || modal.style.display === 'none';
